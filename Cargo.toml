@@ -1,0 +1,21 @@
+[package]
+name = "paste_backend"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.4"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+dotenvy = "0.15"
+rusqlite = { version = "0.37", features = ["bundled"] }
+tower-http = { version = "0.6.6", features = ["cors", "fs"] }
+sha2 = "0.10.9"
+hex = "0.4.3"
+nanoid = "0.4.0"
+tracing = "0.1.41"
+tracing-subscriber = "0.3.20"

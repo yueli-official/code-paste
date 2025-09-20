@@ -1,0 +1,13 @@
+services:
+  paste-backend:
+    image: ghcr.io/yozya-official/code-paste:latest
+    container_name: paste-backend
+    platform: linux/amd64
+    ports:
+      - "9900:9900"
+    volumes:
+      # 挂载数据库
+      - ./data:/app/data
+    environment:
+      # 数据库路径
+      - DATABASE_URL=/app/data/snippets.db
