@@ -46,8 +46,8 @@ async fn main() {
         .with_state(app_state)
         .layer(cors);
 
-    tracing::info!("server listen on port 9900");
+    tracing::info!("server listen on port 9000");
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:9900").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:9000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }

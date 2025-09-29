@@ -60,7 +60,7 @@ COPY --from=backend-builder /usr/src/app/paste_backend ./
 COPY --from=frontend-builder /frontend/dist ./frontend/dist
 
 # 暴露端口
-EXPOSE 9900
+EXPOSE 9000
 
 # 默认启动命令
 CMD ["./paste_backend"]

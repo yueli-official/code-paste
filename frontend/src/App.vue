@@ -13,5 +13,3 @@ import ToastContainer from '@/plugins/toast/ToastContainer.vue'
 
   <Footer />
 </template>
-
-<style scoped></style>

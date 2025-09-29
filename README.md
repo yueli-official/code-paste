@@ -58,7 +58,7 @@ cargo run
 
 默认端口：
 
-* HTTP: `http://localhost:9900`
+* HTTP: `http://localhost:9000`
 
 ### 功能说明
 
@@ -77,7 +77,7 @@ docker-compose up -d
 
 数据库保存在 `根目录/data`
 
-可以使用nginx 反向代理9900 部署网站
+可以使用nginx 反向代理9000 部署网站
 
 ## 🖼️ 项目截图
 
