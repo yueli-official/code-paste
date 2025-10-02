@@ -250,7 +250,6 @@ async function fetchSnippet(password = '') {
     const response = await getSnippet(id, password)
     snippet.value = response.snippet
     passwordRequired.value = false
-    console.log(snippet.value)
   } catch (err: any) {
     console.log(err.response)
     if (err.response?.status === 401) {

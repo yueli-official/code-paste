@@ -103,6 +103,7 @@
                 <option value="text">Text</option>
                 <option value="javascript">JavaScript</option>
                 <option value="typescript">TypeScript</option>
+                <option value="json">JSON</option>
                 <option value="python">Python</option>
                 <option value="java">Java</option>
                 <option value="go">Go</option>
@@ -118,7 +119,6 @@
                 <option value="css">CSS</option>
                 <option value="sql">SQL</option>
                 <option value="bash">Bash</option>
-                <option value="json">JSON</option>
                 <option value="yaml">YAML</option>
                 <option value="markdown">Markdown</option>
               </select>
@@ -161,6 +161,7 @@
             </label>
             <div class="relative">
               <select
+                v-model="visibility"
                 id="visibility"
                 name="visibility"
                 class="flex h-10 appearance-none w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -346,7 +347,27 @@
         </div>
 
         <!-- Submit Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 pt-6">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <!-- New Format Button -->
+          <button
+            type="button"
+            @click="handleFormat"
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer disabled:pointer-events-none disabled:opacity-50 border border-input bg-background text-foreground hover:bg-muted h-10 px-4 py-2 flex-1 order-last sm:order-first"
+          >
+            <span class="inline-flex items-center gap-2">
+              <svg class="w-4 h-4 flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                ></path>
+              </svg>
+              <span>格式化代码</span>
+            </span>
+          </button>
+
+          <!-- Original Submit Button -->
           <button
             type="submit"
             id="submit"
@@ -378,8 +399,25 @@ import CodeEditor from '@/components/CodeEditor.vue'
 import { toast } from '@/plugins/toast'
 import type { CreateSnippetRequest } from '@/models/snippet'
 
+// 导入 Prettier 核心及其所有必要的解析器 (Parser)
+import { format as prettierFormat } from 'prettier/standalone'
+import * as parserBabel from 'prettier/parser-babel' // JS, JSX, JSON
+import * as parserHtml from 'prettier/parser-html'
+import * as parserTypescript from 'prettier/parser-typescript'
+import * as parserPostcss from 'prettier/parser-postcss' // CSS, Less, SCSS
+import * as parserYaml from 'prettier/parser-yaml' // YAML
+import * as parserMarkdown from 'prettier/parser-markdown' // Markdown
+import * as prettierPluginEstree from 'prettier/plugins/estree'
+
+const visibilityMap: Record<string, number> = {
+  public: 0,
+  unlisted: 1,
+  private: 2,
+}
+
+// 过期时间映射表 (秒)
 const expiresMap: Record<string, number> = {
-  '0': 0, // 永久（登录可用）
+  '0': 0, // 永久
   '10min': 10 * 60,
   '60min': 60 * 60,
   '1day': 24 * 60 * 60,
@@ -397,8 +435,84 @@ const title = ref('')
 const language = ref('text')
 const description = ref('')
 const author = ref('匿名用户')
-const visibility = ref(0)
+const visibility = ref('public')
 const expiresAt = ref('10min')
+
+/**
+ * 将应用中的语言名称映射到 Prettier 内部的 parser 名称
+ */
+const getPrettierConfig = (lang: string) => {
+  const lowerLang = lang.toLowerCase()
+
+  // 默认的 Prettier 格式化选项
+  const baseOptions = {
+    tabWidth: 2,
+    useTabs: false,
+    semi: true,
+    singleQuote: true,
+    printWidth: 100,
+    trailingComma: 'es5' as const,
+  }
+
+  const languageMap: Record<string, string> = {
+    javascript: 'babel',
+    typescript: 'typescript',
+    json: 'json',
+    html: 'html',
+    css: 'css',
+    less: 'less',
+    scss: 'scss',
+    markdown: 'markdown', // Updated
+    yaml: 'yaml', // Updated
+  }
+
+  const parser = languageMap[lowerLang]
+
+  // 传递导入的解析器对象作为插件列表
+  const plugins = [
+    parserBabel,
+    parserHtml,
+    parserTypescript,
+    parserPostcss,
+    parserYaml, // Added
+    parserMarkdown, // Added
+    prettierPluginEstree,
+  ]
+
+  return parser ? { ...baseOptions, parser, plugins } : null
+}
+
+// 代码格式化处理函数
+async function handleFormat() {
+  if (!content.value) {
+    toast.error('代码内容不能为空', { title: '系统提示' })
+    return
+  }
+
+  const options = getPrettierConfig(language.value)
+
+  if (!options) {
+    toast.info(`Prettier 暂不支持 ${language.value} 语言的格式化。`, { title: '格式化提示' })
+    return
+  }
+
+  try {
+    // @ts-expect-error https://github.com/prettier/prettier/issues/15473
+    const formattedContent = await prettierFormat(content.value, options)
+
+    if (formattedContent !== content.value) {
+      content.value = formattedContent.trim()
+      toast.success('代码格式化成功！', { title: '系统提示' })
+    } else {
+      toast.info('代码已是最新格式，无需调整。', { title: '格式化提示' })
+    }
+  } catch (error: any) {
+    console.error('Prettier Formatting error:', error)
+    toast.error(`格式化失败，请检查代码语法是否正确。错误信息: ${error.message.split('\n')[0]}`, {
+      title: '格式化错误',
+    })
+  }
+}
 
 // 表单提交
 async function handleSubmit(e: Event) {
@@ -418,7 +532,7 @@ async function handleSubmit(e: Event) {
     expiresInSeconds: expiresMap[expiresAt.value] ?? 0,
     tags: tagsInput.value,
     author: author.value || '匿名用户',
-    visibility: Number(visibility.value) || 0,
+    visibility: visibilityMap[visibility.value] ?? 0,
   }
 
   try {
