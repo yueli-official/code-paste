@@ -1,8 +1,7 @@
 <template>
-  <div
-    ref="editorContainer"
-    class="min-h-[350px] max-h-[70vh] overflow-scroll w-full rounded-md border-2 border-slate-700/50 bg-slate-900/80 backdrop-blur-sm shadow-inner transition-all duration-300 hover:border-slate-600/50 focus-within:border-indigo-500/50 focus-within:shadow-lg focus-within:shadow-indigo-500/10"
-  ></div>
+  <div ref="editorContainer"
+    class="min-h-[350px] max-h-[70vh]  w-full overflow-x-hidden overflow-y-auto rounded-md border-2 border-slate-700/50 bg-slate-900/80 backdrop-blur-sm shadow-inner transition-all duration-300 hover:border-slate-600/50 focus-within:border-indigo-500/50 focus-within:shadow-lg focus-within:shadow-indigo-500/10">
+  </div>
 </template>
 
 <script setup lang="ts">
