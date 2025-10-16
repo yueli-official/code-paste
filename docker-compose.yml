@@ -1,7 +1,7 @@
 services:
-  paste-backend:
+  code-paste:
     image: ghcr.io/yueli-official/code-paste:latest
-    container_name: paste-backend
+    container_name: code-paste
     platform: linux/amd64
     ports:
       - "9000:9000"
