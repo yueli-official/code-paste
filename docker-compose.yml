@@ -1,6 +1,6 @@
 services:
   paste-backend:
-    image: ghcr.io/yozya-official/code-paste:latest
+    image: ghcr.io/yueli-official/code-paste:latest
     container_name: paste-backend
     platform: linux/amd64
     ports:
